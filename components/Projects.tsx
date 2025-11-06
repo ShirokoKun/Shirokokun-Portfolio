@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 // Icon mapping for project categories
-const categoryIcons: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+const categoryIcons: Record<string, React.ComponentType<any>> = {
   'cover-art': ImageIcon,
   'posters': FileText,
   'projects-contributions': Palette,

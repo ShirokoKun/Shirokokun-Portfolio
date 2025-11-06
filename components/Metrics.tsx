@@ -9,7 +9,7 @@ import { PERSONAL_INFO } from '@/constants/personal';
 interface Stat {
   label: string;
   value: number;
-  icon: React.ReactNode;
+  icon: JSX.Element;
 }
 
 interface Skill {
@@ -38,11 +38,12 @@ const Metrics = () => {
 
   // Statistics data from personal info
   const stats: Stat[] = PERSONAL_INFO.stats.map((stat, index) => {
-    const icons = [<Eye size={18} />, <Users size={18} />, <Activity size={18} />, <Clock size={18} />];
+    const iconComponents = [Eye, Users, Activity, Clock];
+    const IconComponent = iconComponents[index] || Code;
     return {
       label: stat.label,
       value: parseInt(stat.value.replace('+', '')),
-      icon: icons[index] || <Code size={18} />
+      icon: <IconComponent key={`icon-${index}`} size={18} />
     };
   });
 

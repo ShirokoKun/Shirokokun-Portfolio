@@ -108,7 +108,8 @@ export default function ArtworkGallery() {
   const [displayedImages, setDisplayedImages] = useState<typeof artworkImages>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
-  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const [imageErrors, setImageErrors] = useState<number[]>([]);
+  const [useLocalImages, setUseLocalImages] = useState(true); // Start with local images
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize with random selection of 6 images
@@ -136,7 +137,7 @@ export default function ArtworkGallery() {
     const shuffled = [...artworkImages].sort(() => Math.random() - 0.5);
     setDisplayedImages(shuffled.slice(0, 6));
     setCurrentIndex(0);
-    setImageErrors(new Set());
+    setImageErrors([]);
   };
 
   const handlePrevious = () => {
@@ -152,14 +153,23 @@ export default function ArtworkGallery() {
   };
 
   const handleImageError = (index: number) => {
-    setImageErrors((prev) => new Set([...prev, index]));
+    setImageErrors((prev) => {
+      if (!prev.includes(index)) {
+        return [...prev, index];
+      }
+      return prev;
+    });
+    // If drive image fails, try local
+    if (!useLocalImages) {
+      setUseLocalImages(true);
+    }
   };
 
   if (displayedImages.length === 0) return null;
 
   const currentImage = displayedImages[currentIndex];
   // Use local images first, fallback to Google Drive if local fails
-  const currentImageUrl = imageErrors.has(currentIndex)
+  const currentImageUrl = imageErrors.includes(currentIndex)
     ? getImageUrl(currentImage, false) // Fallback to Google Drive
     : getImageUrl(currentImage, true); // Use local first
 
@@ -244,7 +254,7 @@ export default function ArtworkGallery() {
         {/* Compact Thumbnail Grid */}
         <div className="grid grid-cols-6 gap-2 md:gap-3 max-w-2xl mx-auto">
           {displayedImages.map((image, index) => {
-            const thumbnailUrl = imageErrors.has(index)
+            const thumbnailUrl = imageErrors.includes(index)
               ? getImageUrl(image, false) // Fallback to Google Drive
               : getImageUrl(image, true); // Use local first
             

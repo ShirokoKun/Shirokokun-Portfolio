@@ -98,7 +98,7 @@ export default function Contact() {
         <div className="grid md:grid-cols-2 gap-12">
           <FadeIn direction="left" delay={0.2}>
             <div>
-              <h2 className="text-4xl md:text-5xl font-black mb-6">Let's Connect</h2>
+              <h2 className="text-4xl md:text-5xl font-black mb-6">Let&apos;s Connect</h2>
               <p className="text-xl text-gray-400 mb-8">
                 Feel free to reach out for collaborations, opportunities, or just to say hello!
               </p>

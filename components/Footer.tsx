@@ -44,7 +44,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-8">
         <div className="bg-black/70 backdrop-blur-md border border-white/5 rounded-2xl p-8 shadow-lg">
           <div className="text-center">
-            <h2 className="text-4xl md:text-5xl font-black mb-6">Let's Connect</h2>
+            <h2 className="text-4xl md:text-5xl font-black mb-6">Let&apos;s Connect</h2>
             <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
               Have a project in mind, or just want to talk about code, design, or development? My inbox is always open.
             </p>

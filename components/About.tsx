@@ -5,7 +5,7 @@ import { Terminal, TrendingUp, Music, Film, Zap, Code2, PenTool, BarChart } from
 import { FadeIn, StaggerContainer, StaggerItem } from './Animations';
 import { motion } from 'framer-motion';
 
-const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+const iconMap: Record<string, React.ComponentType<any>> = {
   Terminal,
   TrendingUp,
   Film,

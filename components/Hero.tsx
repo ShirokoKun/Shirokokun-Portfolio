@@ -93,7 +93,7 @@ export default function Hero() {
             transition={{ duration: 0.6 }}
           >
             <h1 ref={titleRef} className="text-3xl md:text-4xl lg:text-5xl font-sora text-white mb-4 whitespace-nowrap">
-              Hello, I'm <span className="font-thin">{PERSONAL_INFO.name}</span>
+              Hello, I&apos;m <span className="font-thin">{PERSONAL_INFO.name}</span>
             </h1>
           </motion.div>
           

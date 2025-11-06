@@ -126,15 +126,15 @@ export default function Bio() {
             
             <div className="space-y-4 text-lg leading-relaxed">
               <p className="text-gray-300">
-                I'm Swastik Gupta, a multidisciplinary creative and final-year Computer Science student at IIIT Bhubaneswar. 
-                Over the past 5+ years, I've explored and combined different mediums — video editing, photography, UI/UX, 
-                graphic design, and coding — to craft seamless digital experiences. I've worked on 100+ creative projects 
+                I&apos;m Swastik Gupta, a multidisciplinary creative and final-year Computer Science student at IIIT Bhubaneswar. 
+                Over the past 5+ years, I&apos;ve explored and combined different mediums — video editing, photography, UI/UX, 
+                graphic design, and coding — to craft seamless digital experiences. I&apos;ve worked on 100+ creative projects 
                 across editing, social media management, and design, while also being actively involved in societies, 
                 festivals, and internships.
               </p>
               
               <p className="text-gray-400">
-                For me, creativity is not just about aesthetics but about systems, emotions, and connection. Whether I'm 
+                For me, creativity is not just about aesthetics but about systems, emotions, and connection. Whether I&apos;m 
                 designing an interface, editing a film, or building a brand identity, I focus on blending clarity with 
                 character — minimal design with bold accents, professional with personal. My goal is to bridge technology, 
                 storytelling, and design into experiences that feel immersive, interactive, and human.
@@ -230,7 +230,7 @@ export default function Bio() {
                 href="#contact"
                 className="inline-flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
-                Let's Work Together
+                Let&apos;s Work Together
                 <span className="text-lg">→</span>
               </a>
             </div>

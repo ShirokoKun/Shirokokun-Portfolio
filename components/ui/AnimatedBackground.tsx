@@ -75,6 +75,7 @@ const AnimatedBackground = ({ className = '' }: AnimatedBackgroundProps) => {
       color: { r: number; g: number; b: number };
       phase: number;
       amplitude: number;
+      glow: number;
     }> = [];
     
     // Create more points for a richer visual effect

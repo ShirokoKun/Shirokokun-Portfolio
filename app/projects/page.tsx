@@ -15,7 +15,7 @@ import {
 // Note: Metadata moved to layout or using dynamic metadata
 
 // Icon mapping for project categories
-const categoryIcons: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+const categoryIcons: Record<string, React.ComponentType<any>> = {
   'cover-art': ImageIcon,
   'posters': FileText,
   'projects-contributions': Palette,

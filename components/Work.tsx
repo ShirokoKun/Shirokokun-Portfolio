@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import Image from 'next/image';
 import { FadeIn, StaggerContainer, StaggerItem } from './Animations';
 
 // Using placeholder images - replace with your actual project images
@@ -77,13 +76,12 @@ export default function Work() {
                     href="/projects" 
                     className="glass-card overflow-hidden group block"
                   >
-                    <div className="relative h-64">
-                      <Image
+                    <div className="relative h-64 overflow-hidden">
+                      <img
                         src={project.image}
                         alt={project.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
                         onError={(e) => {
                           // Fallback to placeholder if image fails to load
                           const target = e.target as HTMLImageElement;

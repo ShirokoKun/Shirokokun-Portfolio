@@ -242,15 +242,17 @@ export default function Bio() {
               {/* Main photo container with dynamic effects */}
               <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-800 to-zinc-900 p-1">
                 <div className="relative overflow-hidden rounded-3xl">
-                  <div className="relative w-full h-80 bg-zinc-800">
-                    <Image
+                  <div className="relative w-full h-80 bg-zinc-800 overflow-hidden">
+                    <img
                       src="https://drive.google.com/uc?export=view&id=1vFKfMfB19ZmSiJruxdoATxGvQIRMVskV"
                       alt="Swastik Gupta"
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="w-full h-full object-cover"
                       loading="lazy"
-                      unoptimized
+                      onError={(e) => {
+                        // Fallback to placeholder if profile image fails
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/images/placeholder.jpg';
+                      }}
                     />
                   </div>
                   

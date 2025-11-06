@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { FadeIn } from './Animations';
@@ -195,25 +194,24 @@ export default function ArtworkGallery() {
             transition={{ duration: 0.4 }}
             className="relative aspect-[16/10] max-w-3xl mx-auto glass-card overflow-hidden rounded-xl"
           >
-            <Image
-              src={currentImageUrl}
-              alt={currentImage.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 900px"
-              loading="lazy"
-              unoptimized
-              onError={() => handleImageError(currentIndex)}
-            />
+            <div className="relative w-full h-full">
+              <img
+                src={currentImageUrl}
+                alt={currentImage.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={() => handleImageError(currentIndex)}
+              />
             
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-            
-            {/* Compact image counter */}
-            <div className="absolute top-3 right-3 glass-surface px-3 py-1 rounded-full">
-              <span className="text-xs text-white font-medium">
-                {currentIndex + 1} / {displayedImages.length}
-              </span>
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              
+              {/* Compact image counter */}
+              <div className="absolute top-3 right-3 glass-surface px-3 py-1 rounded-full">
+                <span className="text-xs text-white font-medium">
+                  {currentIndex + 1} / {displayedImages.length}
+                </span>
+              </div>
             </div>
           </motion.div>
 
@@ -272,19 +270,18 @@ export default function ArtworkGallery() {
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Image
-                  src={thumbnailUrl}
-                  alt={image.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 16.66vw, 150px"
-                  loading="lazy"
-                  unoptimized
-                  onError={() => handleImageError(index)}
-                />
-                {index === currentIndex && (
-                  <div className="absolute inset-0 bg-purple-500/20" />
-                )}
+                <div className="relative w-full h-full">
+                  <img
+                    src={thumbnailUrl}
+                    alt={image.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    onError={() => handleImageError(index)}
+                  />
+                  {index === currentIndex && (
+                    <div className="absolute inset-0 bg-purple-500/20" />
+                  )}
+                </div>
               </motion.button>
             );
           })}

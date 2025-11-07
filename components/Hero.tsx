@@ -29,17 +29,31 @@ export default function Hero() {
     []
   );
   
-  // Track mouse position for parallax effect
+  // Track mouse position for parallax effect with throttling
   useEffect(() => {
+    let rafId: number | null = null;
+    let lastTime = 0;
+    const throttleDelay = 16; // ~60fps
+    
     const handleMouseMove = (e: { clientX: number; clientY: number; }) => {
-      setMousePosition({
-        x: e.clientX / window.innerWidth - 0.5,
-        y: e.clientY / window.innerHeight - 0.5
-      });
+      const now = Date.now();
+      if (now - lastTime >= throttleDelay) {
+        lastTime = now;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          setMousePosition({
+            x: e.clientX / window.innerWidth - 0.5,
+            y: e.clientY / window.innerHeight - 0.5
+          });
+        });
+      }
     };
     
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   useEffect(() => {
@@ -49,10 +63,17 @@ export default function Hero() {
   useEffect(() => {
     if (!mounted) return;
 
+    let ticking = false;
     const handleScrollReveal = () => {
-      if (!hasTriggeredReveal && window.scrollY > 60) {
-        setShowSpecialties(true);
-        setHasTriggeredReveal(true);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          if (!hasTriggeredReveal && window.scrollY > 60) {
+            setShowSpecialties(true);
+            setHasTriggeredReveal(true);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 

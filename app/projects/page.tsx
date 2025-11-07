@@ -51,16 +51,16 @@ export default function ProjectsPage() {
                 const gradientColor = categoryColors[category.id] || 'from-gray-500 to-gray-700';
                 
                 return (
-                  <a 
-                    key={category.id}
-                    href={category.folderLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <a 
+                  key={category.id}
+                  href={category.folderLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
                     className="glass-card p-8 group block"
                   >
                     <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${gradientColor} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
                       <IconComponent className="text-white" size={40} />
-                    </div>
+                  </div>
                     <h4 className="text-2xl font-bold mb-3">{category.title}</h4>
                     <p className="text-gray-400 mb-6">{category.description}</p>
                     <div className="flex items-center text-blue-400 font-medium">
@@ -68,8 +68,8 @@ export default function ProjectsPage() {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
-                    </div>
-                  </a>
+                  </div>
+                </a>
                 );
               })}
             </div>

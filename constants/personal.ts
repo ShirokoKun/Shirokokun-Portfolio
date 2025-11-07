@@ -128,3 +128,11 @@ export const PROJECT_CATEGORIES = [
 // Resume Download Link
 export const RESUME_LINK = "https://drive.google.com/file/d/12ejKvGYMxyKEVWEPuuWtopX1kdOLehZH/view?usp=drive_link";
 
+// Profile Image
+export const PROFILE_IMAGE = {
+  local: "/profile.jpg", // Check root first
+  localAlt: "/images/profile.jpg", // Then images folder
+  googleDrive: "https://drive.google.com/uc?export=view&id=1vFKfMfB19ZmSiJruxdoATxGvQIRMVskV",
+  placeholder: "/images/placeholder.jpg"
+};
+

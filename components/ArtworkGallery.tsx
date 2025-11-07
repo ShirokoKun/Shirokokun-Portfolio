@@ -98,9 +98,23 @@ const artworkImages = [
 const getImageUrl = (image: typeof artworkImages[0], useLocal: boolean = true) => {
   // Always try local first for better performance
   if (useLocal) {
-    return image.local;
+    // URL encode the path to handle special characters (spaces, brackets, etc.)
+    // Split path and encode each segment
+    const pathParts = image.local.split('/');
+    const encodedParts = pathParts.map((part, index) => {
+      // Don't encode the first empty string or 'images'
+      if (index <= 1) return part;
+      // Encode the filename part
+      return encodeURIComponent(part);
+    });
+    return encodedParts.join('/');
   }
-  return `https://drive.google.com/uc?export=view&id=${image.id}`;
+  // Fallback to Google Drive if local fails
+  if (image.id) {
+    return `https://drive.google.com/uc?export=view&id=${image.id}`;
+  }
+  // Ultimate fallback to placeholder
+  return '/images/placeholder.jpg';
 };
 
 export default function ArtworkGallery() {
@@ -151,16 +165,22 @@ export default function ArtworkGallery() {
     setTimeout(() => setIsAutoRotating(true), 10000);
   };
 
-  const handleImageError = (index: number) => {
-    setImageErrors((prev) => {
-      if (!prev.includes(index)) {
-        return [...prev, index];
-      }
-      return prev;
-    });
-    // If drive image fails, try local
-    if (!useLocalImages) {
-      setUseLocalImages(true);
+  const handleImageError = (index: number, e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    const currentImage = displayedImages[index];
+    
+    // If local image failed and we have a Google Drive ID, try Google Drive
+    if (useLocalImages && currentImage?.id) {
+      target.src = `https://drive.google.com/uc?export=view&id=${currentImage.id}`;
+      setImageErrors((prev) => {
+        if (!prev.includes(index)) {
+          return [...prev, index];
+        }
+        return prev;
+      });
+    } else {
+      // If both fail, use placeholder
+      target.src = '/images/placeholder.jpg';
     }
   };
 
@@ -185,29 +205,27 @@ export default function ArtworkGallery() {
         </FadeIn>
 
         {/* Compact Main Image Display */}
-        <div className="relative mb-4 md:mb-6">
+        <div className="relative mb-3 md:mb-4">
           <motion.div
             key={currentIndex}
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.4 }}
-            className="relative aspect-[16/10] max-w-3xl mx-auto glass-card overflow-hidden rounded-xl"
+            className="relative max-w-xl mx-auto glass-card overflow-hidden rounded-xl p-1.5"
           >
-            <div className="relative w-full h-full">
+            <div className="relative w-full">
               <img
                 src={currentImageUrl}
                 alt={currentImage.title}
-                className="w-full h-full object-cover"
+                className="w-full h-auto object-contain rounded-lg max-h-[400px]"
                 loading="lazy"
-                onError={() => handleImageError(currentIndex)}
+                onError={(e) => handleImageError(currentIndex, e)}
+                style={{ maxHeight: '400px', width: 'auto', margin: '0 auto', display: 'block' }}
               />
-            
-              {/* Subtle gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
               
               {/* Compact image counter */}
-              <div className="absolute top-3 right-3 glass-surface px-3 py-1 rounded-full">
+              <div className="absolute top-2 right-2 glass-surface px-2 py-1 rounded-full">
                 <span className="text-xs text-white font-medium">
                   {currentIndex + 1} / {displayedImages.length}
                 </span>
@@ -264,22 +282,22 @@ export default function ArtworkGallery() {
                   setIsAutoRotating(false);
                   setTimeout(() => setIsAutoRotating(true), 10000);
                 }}
-                className={`relative aspect-square glass-card overflow-hidden rounded-lg ${
+                className={`relative glass-card overflow-hidden rounded-lg p-1 ${
                   index === currentIndex ? 'ring-2 ring-purple-500 ring-offset-1 ring-offset-black' : ''
                 }`}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="relative w-full h-full">
+                <div className="relative w-full">
                   <img
                     src={thumbnailUrl}
                     alt={image.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto object-contain rounded"
                     loading="lazy"
-                    onError={() => handleImageError(index)}
+                    onError={(e) => handleImageError(index, e)}
                   />
                   {index === currentIndex && (
-                    <div className="absolute inset-0 bg-purple-500/20" />
+                    <div className="absolute inset-0 bg-purple-500/20 pointer-events-none rounded" />
                   )}
                 </div>
               </motion.button>

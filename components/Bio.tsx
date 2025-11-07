@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
-import Image from 'next/image';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { MapPin, Calendar, Coffee } from 'lucide-react';
+import { PERSONAL_INFO, PROFILE_IMAGE } from '@/constants/personal';
 
 // Import real brand icons from react-icons
 import { 
@@ -79,6 +79,51 @@ const aiTools = [
   { name: "Trae AI", icon: Cpu },
   { name: "Cursor AI", icon: Wand2 }
 ];
+
+// Profile Image Component with Fallback Chain
+const ProfileImage = () => {
+  const [imageSrc, setImageSrc] = useState(PROFILE_IMAGE.local);
+  const [attempts, setAttempts] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  // Only add cache busting after mount to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+    // Add cache bust on client side only
+    if (typeof window !== 'undefined') {
+      setImageSrc(`${PROFILE_IMAGE.local}?t=${Date.now()}`);
+    }
+  }, []);
+
+  const handleError = () => {
+    setAttempts(prev => {
+      const next = prev + 1;
+      // Try different sources in order
+      if (next === 1) {
+        // Try local alt path
+        setImageSrc(PROFILE_IMAGE.localAlt);
+      } else if (next === 2) {
+        // Try Google Drive
+        setImageSrc(PROFILE_IMAGE.googleDrive);
+      } else if (next === 3) {
+        // Try placeholder
+        setImageSrc(PROFILE_IMAGE.placeholder);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <img
+      key={`profile-${attempts}`} // Stable key to avoid hydration issues
+      src={imageSrc}
+      alt="Swastik Gupta"
+      className="w-full h-full object-cover"
+      loading="lazy"
+      onError={handleError}
+    />
+  );
+};
 
 export default function Bio() {
   const [isVisible, setIsVisible] = useState(false);
@@ -243,17 +288,7 @@ export default function Bio() {
               <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-800 to-zinc-900 p-1">
                 <div className="relative overflow-hidden rounded-3xl">
                   <div className="relative w-full h-80 bg-zinc-800 overflow-hidden">
-                    <img
-                      src="https://drive.google.com/uc?export=view&id=1vFKfMfB19ZmSiJruxdoATxGvQIRMVskV"
-                      alt="Swastik Gupta"
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      onError={(e) => {
-                        // Fallback to placeholder if profile image fails
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/images/placeholder.jpg';
-                      }}
-                    />
+                    <ProfileImage />
                   </div>
                   
                   {/* Overlay gradient */}

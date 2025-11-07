@@ -4,11 +4,13 @@ import { useRef, useEffect, useState } from 'react';
 import { Linkedin, Github, Instagram, Music, Twitter, FileText } from 'lucide-react';
 import { PERSONAL_INFO, RESUME_LINK } from '@/constants/personal';
 
+const social = PERSONAL_INFO.social as Record<string, string>;
+
 const socialLinks = [
-  { icon: Linkedin, label: "LinkedIn", href: PERSONAL_INFO.social.linkedin },
-  { icon: Github, label: "GitHub", href: PERSONAL_INFO.social.github },
-  { icon: Instagram, label: "Instagram", href: PERSONAL_INFO.social.instagram },
-  { icon: Music, label: "Spotify", href: PERSONAL_INFO.social.spotify },
+  { icon: Linkedin, label: "LinkedIn", href: social.linkedin },
+  { icon: Github, label: "GitHub", href: social.github },
+  { icon: Instagram, label: "Instagram", href: social.instagram },
+  ...(social.spotify ? [{ icon: Music, label: "Spotify", href: social.spotify }] : []),
   { icon: FileText, label: "Resume", href: RESUME_LINK },
 ];
 

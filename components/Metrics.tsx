@@ -206,7 +206,7 @@ const Metrics = () => {
                         initial={{ width: 0 }}
                         animate={animate ? { width: `${project.value}%` } : { width: 0 }}
                         transition={{ duration: 1, delay: index * 0.1 + 0.3 }}
-                        className={`h-full rounded-full ${index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-green-500' : index === 2 ? 'bg-indigo-500' : 'bg-purple-500'}`}
+                        className={`h-full rounded-full ${index === 0 ? 'bg-purple-500' : index === 1 ? 'bg-purple-400' : index === 2 ? 'bg-purple-300' : 'bg-purple-600'}`}
                       />
                     </div>
                   </div>

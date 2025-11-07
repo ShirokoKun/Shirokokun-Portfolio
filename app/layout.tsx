@@ -43,9 +43,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${jakarta.variable} ${sora.variable} font-sans`}>
         <ErrorBoundaryWrapper>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            {children}
-          </ThemeProvider>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          {children}
+        </ThemeProvider>
         </ErrorBoundaryWrapper>
       </body>
     </html>

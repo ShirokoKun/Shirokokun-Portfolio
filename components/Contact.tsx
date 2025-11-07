@@ -29,63 +29,21 @@ export default function Contact() {
     setSubmitStatus(null);
 
     try {
-      // Google Forms submission endpoint - using the correct form ID from responder link
-      const formId = '1FAIpQLScI5lJZI81mTwGaHuGYmVqZg7AUM4QUKHY7iCtQ2Y80k6SEFQ';
-      const formUrl = `https://docs.google.com/forms/d/e/${formId}/formResponse`;
-      
-      // Create a hidden iframe for form submission (more reliable method)
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.name = 'hidden_iframe';
-      document.body.appendChild(iframe);
-
-      // Create a form element and submit it through the iframe
-      // IMPORTANT: You need to update these entry IDs by inspecting your Google Form HTML
-      // To find entry IDs: Open form → Inspect (F12) → Look for input name attributes like "entry.XXXXXXXXXX"
-      // Or check utils/getFormEntryIds.md for detailed instructions
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = formUrl;
-      form.target = 'hidden_iframe';
-      form.style.display = 'none';
-
-      // Add form fields with entry IDs
-      // TODO: Replace these placeholder entry IDs with your actual form entry IDs
-      // Order should match: Name, Email, Subject, Message
-      const formFields = [
-        { name: 'entry.2005620554', value: formData.name },      // Name field - UPDATE THIS
-        { name: 'entry.1045781291', value: formData.email },    // Email field - UPDATE THIS
-        { name: 'entry.1065046570', value: formData.subject },   // Subject field - UPDATE THIS
-        { name: 'entry.839337160', value: formData.message },    // Message field - UPDATE THIS
-      ];
-
-      formFields.forEach(({ name, value }) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = value || '';
-        form.appendChild(input);
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
       });
 
-      document.body.appendChild(form);
-      form.submit();
+      if (!response.ok) {
+        throw new Error('Failed to submit form');
+      }
 
-      // Clean up after a delay
-      setTimeout(() => {
-        document.body.removeChild(form);
-        document.body.removeChild(iframe);
-      }, 1000);
-
-      // Assume success (we can't verify with iframe method)
       setSubmitStatus('success');
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
+      setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
-      // Silent error handling
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);

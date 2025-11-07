@@ -1,14 +1,17 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { Linkedin, Github, Instagram, Music, Twitter } from 'lucide-react';
+import { Linkedin, Github, Instagram, Music, Twitter, FileText } from 'lucide-react';
+import { PERSONAL_INFO, RESUME_LINK } from '@/constants/personal';
+
+const social = PERSONAL_INFO.social as Record<string, string>;
 
 const socialLinks = [
-  { icon: Linkedin, label: "LinkedIn", href: "#" },
-  { icon: Github, label: "GitHub", href: "#" },
-  { icon: Instagram, label: "Instagram", href: "#" },
-  { icon: Music, label: "Spotify", href: "#" },
-  { icon: Twitter, label: "Twitter", href: "#" }
+  { icon: Linkedin, label: "LinkedIn", href: social.linkedin },
+  { icon: Github, label: "GitHub", href: social.github },
+  { icon: Instagram, label: "Instagram", href: social.instagram },
+  ...(social.spotify ? [{ icon: Music, label: "Spotify", href: social.spotify }] : []),
+  { icon: FileText, label: "Resume", href: RESUME_LINK },
 ];
 
 export default function Footer() {
@@ -49,16 +52,18 @@ export default function Footer() {
               Have a project in mind, or just want to talk about code, design, or development? My inbox is always open.
             </p>
             <a 
-              href="mailto:kun.shiroko02@gmail.com"
-              className="text-2xl md:text-3xl font-medium inline-block mb-8 hover:text-gray-300 transition-colors duration-300"
+              href={`mailto:${PERSONAL_INFO.alternateEmail}`}
+              className="text-lg sm:text-xl md:text-2xl font-medium inline-block mb-8 hover:text-gray-300 transition-colors duration-300 break-all"
             >
-              kun.shiroko02@gmail.com
+              {PERSONAL_INFO.alternateEmail}
             </a>
             <div className="flex justify-center gap-6">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={social.label}
                   className="text-gray-400 text-2xl hover:text-white hover:scale-125 transition-all duration-300"
                 >

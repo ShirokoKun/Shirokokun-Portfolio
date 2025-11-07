@@ -16,6 +16,21 @@ export default function Home() {
   useEffect(() => {
     // Smooth scrolling behavior
     document.documentElement.style.scrollBehavior = 'smooth';
+    
+    // Optimize scroll performance
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          // Scroll handling logic can go here if needed
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (

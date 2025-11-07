@@ -3,52 +3,11 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 import type { SubstackPost } from '@/types/substack';
+import PostSkeleton from './ui/PostSkeleton';
 
 const CACHE_KEY = 'substack_posts_cache';
 const CACHE_TIMESTAMP_KEY = 'substack_posts_timestamp';
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
-
-// Multiple CORS proxy fallbacks for reliability
-const CORS_PROXIES = [
-  'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.io/?',
-  'https://api.codetabs.com/v1/proxy?quest=',
-];
-
-// Parse RSS XML to extract posts
-const parseRSSFeed = (xmlText: string): SubstackPost[] => {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-  const items = xmlDoc.querySelectorAll('item');
-  
-  return Array.from(items).map((item) => {
-    const title = item.querySelector('title')?.textContent || '';
-    const link = item.querySelector('link')?.textContent || '';
-    const pubDate = item.querySelector('pubDate')?.textContent || '';
-    const author = item.querySelector('creator')?.textContent || item.querySelector('author')?.textContent || '';
-    const content = item.querySelector('content\\:encoded')?.textContent || item.querySelector('description')?.textContent || '';
-    const contentSnippet = item.querySelector('description')?.textContent || content.substring(0, 200) || '';
-    const guid = item.querySelector('guid')?.textContent || link;
-    const isoDate = item.querySelector('pubDate')?.textContent || '';
-    const enclosure = item.querySelector('enclosure');
-    
-    return {
-      title,
-      link,
-      pubDate,
-      author,
-      content,
-      contentSnippet: contentSnippet.replace(/<[^>]*>/g, '').substring(0, 200), // Strip HTML and limit length
-      guid,
-      isoDate,
-      categories: Array.from(item.querySelectorAll('category')).map(cat => cat.textContent || ''),
-      enclosure: enclosure ? {
-        url: enclosure.getAttribute('url') || '',
-        type: enclosure.getAttribute('type') || '',
-      } : undefined,
-    };
-  });
-};
 
 // Load cached posts from localStorage
 const loadCachedPosts = (): SubstackPost[] | null => {
@@ -79,46 +38,35 @@ const saveCachedPosts = (posts: SubstackPost[]) => {
   }
 };
 
-// Fetch with retry logic and multiple proxy fallbacks
-const fetchWithRetry = async (
-  feedUrl: string,
-  retries = 3,
-  delay = 1000
-): Promise<string> => {
-  for (let attempt = 0; attempt < CORS_PROXIES.length; attempt++) {
-    const proxy = CORS_PROXIES[attempt];
-    for (let retry = 0; retry < retries; retry++) {
-      try {
-        const url = `${proxy}${encodeURIComponent(feedUrl)}`;
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-        
-        const response = await fetch(url, {
-          cache: 'no-store',
-          signal: controller.signal,
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const text = await response.text();
-        if (text && text.trim().length > 0) {
-          return text;
-        }
-        throw new Error('Empty response');
-      } catch (err) {
-        if (retry === retries - 1 && attempt === CORS_PROXIES.length - 1) {
-          throw err;
-        }
-        // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, retry)));
-      }
+// Fetch posts from server-side API route (much faster than CORS proxies)
+const fetchPostsFromAPI = async (): Promise<SubstackPost[]> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+  
+  try {
+    const response = await fetch('/api/substack', {
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
+    
+    const data = await response.json();
+    if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
+      return data.posts;
+    }
+    throw new Error('No posts found');
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('Request timeout');
+    }
+    throw err;
   }
-  throw new Error('All proxies failed');
 };
 
 export default function SubstackBlog() {
@@ -127,6 +75,7 @@ export default function SubstackBlog() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const postsRef = useRef<SubstackPost[]>([]);
   
   // Keep ref in sync with state
@@ -134,34 +83,37 @@ export default function SubstackBlog() {
     postsRef.current = posts;
   }, [posts]);
 
+  // Set mounted state to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const fetchPosts = useCallback(async (showRefreshing = false, forceRefresh = false) => {
     const currentPosts = postsRef.current.length;
     if (showRefreshing) setRefreshing(true);
     
-    // Load cached posts first (unless forcing refresh)
+    // Load cached posts first (unless forcing refresh) - show immediately for instant UX
     if (!forceRefresh) {
       const cached = loadCachedPosts();
       if (cached && cached.length > 0) {
         setPosts(cached);
         setLoading(false);
-        // Continue fetching in background
+        // Continue fetching fresh posts in background
       }
     }
     
     try {
       setIsRetrying(false);
-      const timestamp = Date.now();
-      const feedUrl = `https://shirokokun.substack.com/feed?t=${timestamp}`;
       
-      const xmlText = await fetchWithRetry(feedUrl);
-      const parsedPosts = parseRSSFeed(xmlText);
+      // Use server-side API route (much faster than CORS proxies)
+      const fetchedPosts = await fetchPostsFromAPI();
       
-      if (parsedPosts.length > 0) {
-        setPosts(parsedPosts);
-        saveCachedPosts(parsedPosts);
+      if (fetchedPosts.length > 0) {
+        setPosts(fetchedPosts);
+        saveCachedPosts(fetchedPosts);
         setError(null);
       } else {
-        throw new Error('No posts found in feed');
+        throw new Error('No posts found');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Network error';
@@ -190,6 +142,8 @@ export default function SubstackBlog() {
   }, []);
 
   useEffect(() => {
+    if (!mounted) return;
+    
     // Load cached posts immediately
     const cached = loadCachedPosts();
     if (cached && cached.length > 0) {
@@ -199,7 +153,7 @@ export default function SubstackBlog() {
     
     // Then fetch fresh posts
     fetchPosts();
-  }, []);
+  }, [mounted, fetchPosts]);
 
   return (
     <section className="py-12 md:py-16">
@@ -231,9 +185,10 @@ export default function SubstackBlog() {
           )}
         </div>
 
-        {loading && posts.length === 0 ? (
-          <div className="flex justify-center items-center min-h-[300px]">
-            <div className="text-gray-400">Loading posts...</div>
+        {(!mounted || (loading && posts.length === 0)) ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <PostSkeleton />
+            <PostSkeleton />
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-12">
@@ -247,11 +202,13 @@ export default function SubstackBlog() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {posts.map((post) => (
-            <article
-              key={post.guid}
-              className="glass-card p-6 hover:translate-y-[-2px] transition-transform"
-            >
+            {posts.map((post, index) => {
+              const delayClass = index < 6 ? `post-fade-in-${index}` : 'post-fade-in-5';
+              return (
+              <article
+                key={post.guid}
+                className={`glass-card p-6 hover:translate-y-[-2px] transition-all duration-500 animate-fade-in ${delayClass}`}
+              >
               {post.enclosure?.url && (
                 <img
                   src={post.enclosure.url}
@@ -287,7 +244,8 @@ export default function SubstackBlog() {
                 Read More →
               </a>
             </article>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
